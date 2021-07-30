@@ -1,29 +1,12 @@
 from flask import Flask
-import logging
-from logging.config import dictConfig
+from multiprocessing import Process
 
 from analytics_engine import AnalyticsEngine
+from logger import Logger
 from lunar_crush_client import LunarCrushClient
 
-logger = logging.getLogger("coinarius_analytics")
-dictConfig(
-    {
-        "version": 1,
-        "formatters": {
-            "default": {
-                "format": "[%(asctime)s] %(levelname)s - %(message)s",
-            }
-        },
-        "handlers": {
-            "wsgi": {
-                "class": "logging.StreamHandler",
-                "stream": "ext://sys.stdout",
-                "formatter": "default",
-            }
-        },
-        "root": {"level": "DEBUG", "handlers": ["wsgi"]},
-    }
-)
+
+logger = Logger.get_instance()
 
 lunar_crush_client = LunarCrushClient()
 analytics_engine = AnalyticsEngine(lunar_crush_client)
@@ -33,13 +16,26 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    logging.info("Handling request to root URI by starting analytics engine.")
+    logger.log("Handling request to root URI by returning price dataframe.")
 
-    return analytics_engine.start()
+    return analytics_engine.price_data
+
+
+@app.before_first_request
+def init_coinarius_analytics():
+    logger.log("Initialising Coinarius Analytics engine!")
+    analytics_engine.initialise()
 
 
 if __name__ == "__main__":
-    logging.info("Starting Coinarius Analytics server!")
+    logger.log("Starting Coinarius Analytics!")
+    analytics_engine.initialise()
 
-    # Start the flask server.
-    app.run(debug=True)
+    engine_process = Process(target=analytics_engine.start)
+    engine_process.start()
+    print("Bar")
+
+    logger.log("Starting Flask server!")
+    app.run(debug=True, use_reloader=False)
+
+    engine_process.join()

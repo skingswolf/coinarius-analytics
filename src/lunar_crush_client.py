@@ -1,7 +1,7 @@
-import logging
 import os
-
 import requests
+
+from logger import Logger
 
 
 class LunarCrushClient:
@@ -23,7 +23,7 @@ class LunarCrushClient:
 
     """
 
-    symbols = "BTC"
+    symbols = "BTC,ETH,LTC"
 
     # TODO: refactor this API key into an environment variable.
     api_key = "p9gd66qlvlkdvox9dltmnk"
@@ -35,6 +35,7 @@ class LunarCrushClient:
         """
 
         self.__api_key = os.environ["LUNAR_CRUSH_API_KEY"]
+        self.__logger = Logger.get_instance()
 
     def fetch_asset_data(self):
         """
@@ -46,12 +47,15 @@ class LunarCrushClient:
             A dictionary where the keys are the asset symbols and the values asset data
             (e.g. time series data, etc).
         """
-        logging.info("Fetching asset data from the LunarCrush API.")
+        self.__logger.log("Fetching asset data from the LunarCrush API.")
 
         query = {
             "data": "assets",
             "key": self.__api_key,
             "symbol": LunarCrushClient.symbols,
+            "interval": "day",
+            "time_series_indicators": "close",
+            "data_points": 100,
         }
         response = requests.get(LunarCrushClient.lunar_crush_base_url, params=query)
 
