@@ -11,8 +11,6 @@ class LunarCrushClient:
     ...
     Class Attributes
     ----------
-    api_key : String
-        The LunarCrush API key
     lunar_crush_base_url : String
         Base URL for all calls to the LunarCrush API.
 
@@ -20,13 +18,12 @@ class LunarCrushClient:
     ----------
     __logger : Logger
         The logger of this class.
+    __api_key : String
+        The LunarCrush API key
 
     """
 
     symbols = "BTC,ETH,LTC"
-
-    # TODO: refactor this API key into an environment variable.
-    api_key = "p9gd66qlvlkdvox9dltmnk"
     lunar_crush_base_url = "https://api.lunarcrush.com/v2"
 
     def __init__(self):

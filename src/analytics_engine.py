@@ -27,6 +27,8 @@ class AnalyticsEngine:
         self.__logger = Logger.get_instance()
         self.__lunar_crush_client = lunar_crush_client
         self.__is_initialised = False
+        self.__earliest_time = None
+        self.__latest_time = None
 
         self.price_data = None
 
@@ -49,9 +51,17 @@ class AnalyticsEngine:
         self.__is_initialised = True
         raw_asset_data = self.__lunar_crush_client.fetch_asset_data()
 
-        # TODO: Insert price data
-
+        # TODO: Insert price data into SQL table
         price_data = self.generate_price_analytics(raw_asset_data)
+
+        time_format = "%Y-%m-%d, %H:%M:%S"
+        self.__earliest_time = datetime.timestamp(
+            datetime.strptime(price_data["BTC"]["time_series"][0][0], time_format)
+        )
+        self.__latest_time = datetime.timestamp(
+            datetime.strptime(price_data["BTC"]["time_series"][-1][0], time_format)
+        )
+
         self.set_price_data(price_data)
 
     def start(self):
@@ -64,11 +74,34 @@ class AnalyticsEngine:
         TODO
         """
         i = 0
+        update_lag = 15  # lag in seconds
+        day_in_seconds = 24 * 60 * 60
 
         while True:
             i += 1
-            time.sleep(2)
-            self.__logger.log(f"{i}th iteration of the engine's infinite loop")
+            time.sleep(update_lag)
+            self.__logger.log(
+                f"Polling LunarCrush API for the {i}th time to see if there's any fresh data"
+            )
+
+            current_time = datetime.timestamp(datetime.now())
+            raw_asset_data = self.__lunar_crush_client.fetch_asset_data()
+
+            if current_time - self.__latest_time < day_in_seconds:
+                # Just find the most recent price and push update to websocket.
+                latest_prices = {
+                    datum["symbol"]: datum["price"] for datum in raw_asset_data["data"]
+                }
+
+                # TODO push to websocket connection.
+                continue
+
+            # TODO: Insert price data into SQL table
+            # TODO push to websocket connection.
+            price_data = self.generate_price_analytics(raw_asset_data)
+            self.set_price_data(price_data)
+
+        datetime.strptime(price_data["BTC"]["time_series"][0][0], time_format)
 
     def get_price_data(self):
         return self.__price_data
