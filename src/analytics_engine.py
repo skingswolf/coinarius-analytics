@@ -18,17 +18,23 @@ class AnalyticsEngine:
         The logger of this class.
     __lunar_crush_client : LunarCrushClient
         The client for the LunarCrush API.
+
+        TODO
     """
 
-    def __init__(self, lunar_crush_client):
+    def __init__(self, lunar_crush_client, price_analytics_generator):
         """
         Initialises a new instance of this class.
+
+        TODO
         """
         self.__logger = Logger.get_instance()
         self.__lunar_crush_client = lunar_crush_client
         self.__is_initialised = False
         self.__earliest_time = None
         self.__latest_time = None
+
+        self.__price_analytics_generator = price_analytics_generator
 
         self.price_data = None
 
@@ -50,17 +56,11 @@ class AnalyticsEngine:
         self.__logger.log("Initialising analytics engine!")
         self.__is_initialised = True
         raw_asset_data = self.__lunar_crush_client.fetch_asset_data()
+        price_data = self.__price_analytics_generator.generate(raw_asset_data)
 
-        # TODO: Insert price data into SQL table
-        price_data = self.generate_price_analytics(raw_asset_data)
-
-        time_format = "%Y-%m-%d, %H:%M:%S"
-        self.__earliest_time = datetime.timestamp(
-            datetime.strptime(price_data["BTC"]["time_series"][0][0], time_format)
-        )
-        self.__latest_time = datetime.timestamp(
-            datetime.strptime(price_data["BTC"]["time_series"][-1][0], time_format)
-        )
+        raw_time_series = raw_asset_data["data"][0]["timeSeries"]
+        self.__earliest_time = raw_time_series[0]["time"]
+        self.__latest_time = raw_time_series[-1]["time"]
 
         self.set_price_data(price_data)
 
@@ -98,10 +98,8 @@ class AnalyticsEngine:
 
             # TODO: Insert price data into SQL table
             # TODO push to websocket connection.
-            price_data = self.generate_price_analytics(raw_asset_data)
+            price_data = self.__price_analytics_generator.generate(raw_asset_data)
             self.set_price_data(price_data)
-
-        datetime.strptime(price_data["BTC"]["time_series"][0][0], time_format)
 
     def get_price_data(self):
         return self.__price_data
@@ -110,36 +108,3 @@ class AnalyticsEngine:
         self.__price_data = value
 
     price_data = property(get_price_data, set_price_data)
-
-    def generate_price_analytics(self, asset_data):
-        """
-        TODO
-        Returns
-        -------
-        TODO
-        """
-        parse_time_series = lambda ts: [
-            (
-                datetime.fromtimestamp(entry["time"]).strftime("%Y-%m-%d, %H:%M:%S"),
-                entry["close"],
-            )
-            for entry in ts
-        ]
-
-        def construct_price_record(datum):
-            time_series = parse_time_series(datum["timeSeries"])
-            last_price = datum["price"]
-            prices = [entry[1] for entry in time_series]
-            prices.append(last_price)
-            z_score = stats.zscore(prices)[-1]
-
-            return {
-                "time_series": time_series,
-                "last_price": last_price,
-                "z_score": z_score,
-            }
-
-        return {
-            datum["symbol"]: construct_price_record(datum)
-            for datum in asset_data["data"]
-        }

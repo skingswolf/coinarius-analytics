@@ -1,6 +1,7 @@
 from flask import Flask
 from multiprocessing import Process
 
+from PriceAnalyticsGenerator import PriceAnalyticsGenerator
 from analytics_engine import AnalyticsEngine
 from logger import Logger
 from lunar_crush_client import LunarCrushClient
@@ -9,7 +10,8 @@ from lunar_crush_client import LunarCrushClient
 logger = Logger.get_instance()
 
 lunar_crush_client = LunarCrushClient()
-analytics_engine = AnalyticsEngine(lunar_crush_client)
+price_analytics_generator = PriceAnalyticsGenerator()
+analytics_engine = AnalyticsEngine(lunar_crush_client, price_analytics_generator)
 
 app = Flask(__name__)
 
