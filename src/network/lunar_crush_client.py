@@ -1,7 +1,7 @@
 import os
 import requests
 
-from logger import Logger
+from utils.logger import Logger
 
 
 class LunarCrushClient:
@@ -16,7 +16,7 @@ class LunarCrushClient:
 
     Instance Attributes
     ----------
-    __logger : Logger
+    _logger : Logger
         The logger of this class.
     __api_key : String
         The LunarCrush API key
@@ -34,10 +34,15 @@ class LunarCrushClient:
         self.__api_key = os.environ["LUNAR_CRUSH_API_KEY"]
         self.__logger = Logger.get_instance()
 
-    def fetch_asset_data(self):
+    def fetch_asset_data(self, num_of_datapoints=100):
         """
         Fetches asset data such as close data, volumetric data, etc, from
         the LunarCrush API.
+
+        Parameters
+        ----------
+        num_of_datapoints : int
+            The number of time series datapoints to fetch from the API.
 
         Returns
         -------
@@ -52,7 +57,7 @@ class LunarCrushClient:
             "symbol": LunarCrushClient.symbols,
             "interval": "day",
             "time_series_indicators": "close",
-            "data_points": 100,
+            "data_points": num_of_datapoints,
         }
         response = requests.get(LunarCrushClient.lunar_crush_base_url, params=query)
 
