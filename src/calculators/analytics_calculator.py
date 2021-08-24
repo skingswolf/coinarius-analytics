@@ -45,6 +45,8 @@ class AnalyticsCalculator:
             Analytics data dictionary indexed by symbol names.
         """
 
+        self._logger.log(f"Calculating {self.__analytics_id} data for all symbols.")
+
         self.price_data = price_data
         self.analytics_data = {
             datum["symbol"]: self.__build_entry(datum) for datum in price_data["data"]
@@ -52,14 +54,14 @@ class AnalyticsCalculator:
 
         return self.analytics_data
 
-    def calculate_latest(self, latest_price):
+    def calculate_latest(self, latest_prices):
         """
         Calculates the analytics only for the most recent tick.
 
         Parameters
         ----------
-        latest_price : double
-            The latest tick price.
+        latest_prices : dict
+            The latest tick prices dictionary indexed by symbol.
 
         Returns
         -------
@@ -73,7 +75,9 @@ class AnalyticsCalculator:
 
         return {
             symbol: self._calculate_latest_analytics(
-                latest_price, self.price_data[symbol], self.analytics_data[symbol]
+                latest_prices[symbol],
+                self.price_data[symbol],
+                self.analytics_data[symbol],
             )
             for symbol in self.analytics_data.keys()
         }
@@ -89,6 +93,10 @@ class AnalyticsCalculator:
         """
 
         symbol = entry["symbol"]
+        self._logger.log(
+            f"Building entry for {self.__analytics_id} data for the asset symbol {symbol}."
+        )
+
         prices = [entry[1] for entry in entry["time_series"]]
         time_datapoints = [entry[0] for entry in entry["time_series"]]
         analytics = self._calculate_analytics(prices.append(entry["last_price"]))

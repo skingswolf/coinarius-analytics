@@ -3,15 +3,19 @@ from multiprocessing import Process
 
 from calculators.price_calculator import PriceCalculator
 from core.analytics_engine import AnalyticsEngine
+from core.symbol_store import SymbolStore
 from utils.logger import Logger
 from network.lunar_crush_client import LunarCrushClient
 
 
 logger = Logger.get_instance()
 
-lunar_crush_client = LunarCrushClient()
+symbol_store = SymbolStore.get_instance()
+lunar_crush_client = LunarCrushClient(symbol_store)
 price_analytics_generator = PriceCalculator()
-analytics_engine = AnalyticsEngine(lunar_crush_client, price_analytics_generator)
+analytics_engine = AnalyticsEngine(
+    lunar_crush_client, price_analytics_generator, symbol_store
+)
 
 app = Flask(__name__)
 

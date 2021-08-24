@@ -20,19 +20,25 @@ class LunarCrushClient:
         The logger of this class.
     __api_key : String
         The LunarCrush API key
-
+    __symbol_store
+        The symbol store.
     """
 
-    symbols = "BTC,ETH,LTC"
     lunar_crush_base_url = "https://api.lunarcrush.com/v2"
 
-    def __init__(self):
+    def __init__(self, symbol_store):
         """
         Initialises a new instance of this class.
+
+        Parameters
+        ----------
+        symbol_store
+            The symbol store.
         """
 
         self.__api_key = os.environ["LUNAR_CRUSH_API_KEY"]
         self.__logger = Logger.get_instance()
+        self.__symbol_store = symbol_store
 
     def fetch_asset_data(self, num_of_datapoints=100):
         """
@@ -54,7 +60,7 @@ class LunarCrushClient:
         query = {
             "data": "assets",
             "key": self.__api_key,
-            "symbol": LunarCrushClient.symbols,
+            "symbol": str(self.__symbol_store),
             "interval": "day",
             "time_series_indicators": "close",
             "data_points": num_of_datapoints,

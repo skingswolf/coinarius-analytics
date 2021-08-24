@@ -1,7 +1,7 @@
 from datetime import datetime
 import scipy.stats as stats
 
-from analytics_calculator import AnalyticsCalculator
+from .analytics_calculator import AnalyticsCalculator
 
 
 class PriceCalculator(AnalyticsCalculator):

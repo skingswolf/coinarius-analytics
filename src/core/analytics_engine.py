@@ -21,7 +21,7 @@ class AnalyticsEngine:
         TODO
     """
 
-    def __init__(self, lunar_crush_client, price_analytics_generator):
+    def __init__(self, lunar_crush_client, price_analytics_generator, symbol_store):
         """
         Initialises a new instance of this class.
 
@@ -30,6 +30,7 @@ class AnalyticsEngine:
         self.__logger = Logger.get_instance()
         self.__lunar_crush_client = lunar_crush_client
         self.__price_analytics_generator = price_analytics_generator
+        self.__symbol_store = symbol_store
 
         self.__is_initialised = False
         self.__earliest_time = None
@@ -41,10 +42,6 @@ class AnalyticsEngine:
         """
         Initialises the analytics engine, fetching relevant data from the
         LunarCrush API required for starting the engine later
-
-        Returns
-        -------
-        TODO
         """
         if self.__is_initialised:
             self.__logger.log(
@@ -69,8 +66,9 @@ class AnalyticsEngine:
         """
 
         if not self.__is_initialised:
-            # TODO: throw an error
-            return
+            raise Exception(
+                "Cannot start running the analytics engine because it hasn't been initialised yet."
+            )
 
         i = 0
         update_lag = 15  # lag in seconds
@@ -93,6 +91,8 @@ class AnalyticsEngine:
                     datum["symbol"]: datum["price"]
                     for datum in self.__raw_asset_data["data"]
                 }
+
+                foo = calculate_latest(latest_prices)
 
                 # TODO push lastest tick + historical changes to websocket connection.
                 continue
