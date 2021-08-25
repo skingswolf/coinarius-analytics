@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 import time
 
 from utils.logger import Logger
@@ -17,8 +18,10 @@ class AnalyticsEngine:
         The logger of this class.
     __lunar_crush_client : LunarCrushClient
         The client for the LunarCrush API.
-
-        TODO
+    symbol_store: SymbolStore
+        The symbol store
+    calculators: AnalyticsCalculators[]
+        The list of analytics calculators.
     """
 
     def __init__(self, lunar_crush_client, symbol_store, calculators):
@@ -48,16 +51,17 @@ class AnalyticsEngine:
         self.analytics_data = None
         self.engine_output = None
 
-    def initialise(self):
+    def initialise(self, shared_state):
         """
         Initialises the analytics engine, fetching relevant data from the
         LunarCrush API required for starting the engine later
 
-        Returns
-        -------
-            A dictionary keyed by symbol containing all the generated anlaytics.
-
+        Parameters
+        ----------
+        shared_state : dict
+            Shared state inter-process cache for the new analytics.
         """
+
         if self.__is_initialised:
             self.__logger.log(
                 "Skipping the analytics engine initialisation as it has already been initialised!"
@@ -69,12 +73,11 @@ class AnalyticsEngine:
         self.__update_raw_asset_data()
 
         engine_output = self.__generate_analytics()
+        self.__update_analytics_shared_state(shared_state)
 
         self.__is_initialised = True
 
-        return engine_output
-
-    def run(self):
+    def run(self, shared_state):
         """
         Starts running the analytics engine, which runs a infinite loop that
         periodically polls the LunarCrushAPI for new data.
@@ -112,7 +115,25 @@ class AnalyticsEngine:
             # TODO push lastest tick or full historical changes to websocket connection.
             analytics = generate()
 
+            self.__update_analytics_shared_state(shared_state)
             print("foo")
+
+    def __update_analytics_shared_state(self, shared_state):
+        """
+        Updates the shared state inter-process  cache for the new analytics.
+
+        Parameters
+        ----------
+        shared_state : dict
+            Shared state inter-process cache for the new analytics.
+        """
+
+        # Update the interprocess cache for the calculated analytics.
+        shared_state["update"] += 1
+
+        # shared_state["analytics"] = json.dumps(self.engine_output)
+        shared_state["analytics"] = self.engine_output
+        return
 
     def __generate_analytics(self):
         """
@@ -123,6 +144,7 @@ class AnalyticsEngine:
         -------
             A dictionary keyed by symbol containing all the generated anlaytics.
         """
+
         price_data = self.__price_calculator.calculate(self.__raw_asset_data)
 
         self.analytics_data = {

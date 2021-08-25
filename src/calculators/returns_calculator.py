@@ -28,7 +28,7 @@ class ReturnsCalculator(AnalyticsCalculator):
         -------
             An array of the calculated analytics.
         """
-        return np.diff(np.log(prices))
+        return np.diff(np.log(list(filter(None, prices))))
 
     def _calculate_latest_analytics(self, latest_price, prices, analytics):
         """
