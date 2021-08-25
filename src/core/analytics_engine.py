@@ -52,6 +52,11 @@ class AnalyticsEngine:
         """
         Initialises the analytics engine, fetching relevant data from the
         LunarCrush API required for starting the engine later
+
+        Returns
+        -------
+            A dictionary keyed by symbol containing all the generated anlaytics.
+
         """
         if self.__is_initialised:
             self.__logger.log(
@@ -63,9 +68,11 @@ class AnalyticsEngine:
 
         self.__update_raw_asset_data()
 
-        self.__generate_analytics()
+        engine_output = self.__generate_analytics()
 
         self.__is_initialised = True
+
+        return engine_output
 
     def run(self):
         """
@@ -114,7 +121,7 @@ class AnalyticsEngine:
 
         Returns
         -------
-            A dicionary keyed by symbol containing all the generated anlaytics.
+            A dictionary keyed by symbol containing all the generated anlaytics.
         """
         price_data = self.__price_calculator.calculate(self.__raw_asset_data)
 
@@ -142,7 +149,7 @@ class AnalyticsEngine:
 
         Returns
         -------
-            A dicionary keyed by symbol containing all the generated anlaytics for the latest tick prices.
+            A dictionary keyed by symbol containing all the generated anlaytics for the latest tick prices.
         """
 
         latest_prices = {
