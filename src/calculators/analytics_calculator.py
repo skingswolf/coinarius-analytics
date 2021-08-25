@@ -13,8 +13,8 @@ class AnalyticsCalculator:
     ----------
     _logger : Logger
         The logger of this class.
-    __analytics_id : string
-        An ID which is simply the name of the analytics e.g.
+    id : string
+        An ID for the calculator which is simply the name of the analytics being calculated.
     price_data : dict
         Price data dictionary indexed by symbol names.
     analytics_data : dict
@@ -26,7 +26,7 @@ class AnalyticsCalculator:
         Initialises a new instance of this class.
         """
         self._logger = Logger.get_instance()
-        self.__analytics_id = analytics_id
+        self.id = analytics_id
         self.price_data = None
         self.analytics_data = None
 
@@ -37,19 +37,19 @@ class AnalyticsCalculator:
         Parameters
         ----------
         price_data : dict
-            Price data dictionary where relevant information
-            is indexed by the keyword "data".
+            Price data dictionary.
 
         Returns
         -------
             Analytics data dictionary indexed by symbol names.
         """
 
-        self._logger.log(f"Calculating {self.__analytics_id} data for all symbols.")
+        self._logger.log(f"Calculating {self.id} data for all symbols.")
 
         self.price_data = price_data
         self.analytics_data = {
-            datum["symbol"]: self.__build_entry(datum) for datum in price_data["data"]
+            symbol: self.__build_entry(symbol, price_data[symbol])
+            for symbol in price_data
         }
 
         return self.analytics_data
@@ -76,39 +76,45 @@ class AnalyticsCalculator:
         return {
             symbol: self._calculate_latest_analytics(
                 latest_prices[symbol],
-                self.price_data[symbol],
-                self.analytics_data[symbol],
+                [entry[1] for entry in self.price_data[symbol]["time_series"]],
+                [entry[1] for entry in self.analytics_data[symbol]["time_series"]],
             )
             for symbol in self.analytics_data.keys()
         }
 
-    def __build_entry(self, entry):
+    def __build_entry(self, symbol, entry):
         """
         Constructs an analytics data dictionary entry given a
         price data dictionary entry.
 
+        Parameters
+        ----------
+        symbol: str
+            The asset symbol.
+        entry: dict
+            Dictionary with key value pairs corresponding to the price time series,
+            last tick price and the z score for the last tick price.
         Returns
         -------
             An analytics data entry (i.e. a dictionary).
         """
 
-        symbol = entry["symbol"]
         self._logger.log(
-            f"Building entry for {self.__analytics_id} data for the asset symbol {symbol}."
+            f"Building entry for {self.id} data for the asset symbol {symbol}."
         )
 
         prices = [entry[1] for entry in entry["time_series"]]
         time_datapoints = [entry[0] for entry in entry["time_series"]]
-        analytics = self._calculate_analytics(prices.append(entry["last_price"]))
+        analytics = self._calculate_analytics([*prices, entry["last_price"]])
 
         last_analytics_value = analytics[-1]
         z_score = stats.zscore(analytics)[-1]
 
-        analytics_time_series = zip(time_datapoints, analytics[:-1])
+        analytics_time_series = list(zip(time_datapoints, analytics[:-1]))
 
         return {
             "time_series": analytics_time_series,
-            f"last_{self.__analytics_id}": last_analytics_value,
+            f"last_{self.id}": last_analytics_value,
             "last_z_score": z_score,
         }
 

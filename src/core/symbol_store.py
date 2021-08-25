@@ -1,18 +1,15 @@
-symbols = "BTC,ETH,LTC"
-
-
 class SymbolStore:
     """
     Represents a store containing all symbols in the coinarius analytics universe.
     """
 
     __instance = None
-    symbols = ["BTC", "ETH", "LTC", "BCH", "DOGE"]
 
     def __init__(self):
         """
         Initialises a new instance of this class.
         """
+        self.symbols = ["BTC", "ETH", "LTC", "BCH", "DOGE"]
 
         if SymbolStore.__instance is not None:
             raise Exception("SymbolStore class is a Singleton!")
@@ -39,4 +36,4 @@ class SymbolStore:
             A comma separated string list of symbols.
         """
 
-        return ",".join(symbols)
+        return ",".join(self.symbols)

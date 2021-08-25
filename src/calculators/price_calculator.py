@@ -31,20 +31,36 @@ class PriceCalculator(AnalyticsCalculator):
             Price data dictionary indexed by symbol names.
         """
         price_data = {
-            datum["symbol"]: self.__build_entry(datum) for datum in asset_data["data"]
+            datum["symbol"]: self.__build_entry(datum["symbol"], datum)
+            for datum in asset_data["data"]
         }
+
+        self.price_data = price_data
+        self.analytics_data = price_data
 
         return price_data
 
-    def __build_entry(self, entry):
+    def __build_entry(self, symbol, entry):
         """
         Constructs an analytics data dictionary entry given a
-        price data dictionary entry.
+        raw asset data data dictionary entry.
+
+        Parameters
+        ----------
+        symbol: str
+            The asset symbol.
+        entry: dict
+            Dictionary with key value pairs corresponding to the price time series,
+            last tick price and the z score for the last tick price.
 
         Returns
         -------
             An analytics data entry (i.e. a dictionary).
         """
+
+        self._logger.log(
+            f"Building entry for {self.id} data for the asset symbol {symbol}."
+        )
 
         reformat_time = lambda t: datetime.fromtimestamp(t).strftime(
             "%Y-%m-%d, %H:%M:%S"
@@ -60,12 +76,37 @@ class PriceCalculator(AnalyticsCalculator):
         parsed_time_series = parse_time_series(entry["timeSeries"])
 
         last_price = entry["price"]
-        prices = [entry[1] for entry in parsed_time_series]
-        prices.append(last_price)
-        z_score = stats.zscore(prices)[-1]
+        prices = [entry[1] for entry in parsed_time_series if entry[1] is not None]
+        z_score = stats.zscore([*prices, last_price])[-1]
 
         return {
             "time_series": parsed_time_series,
             "last_price": last_price,
+            "last_z_score": z_score,
+        }
+
+    def _calculate_latest_analytics(self, latest_price, prices, analytics):
+        """
+        Calculate the analytics using the given prices but only for the latest tick.
+
+        Parameters
+        ----------
+        latest_price : double
+            The latest tick price.
+        prices : double[]
+            An array of prices.
+        analytics : double[
+            An array of analytics values.
+
+        Returns
+        -------
+            An array of the calculated analytics.
+        """
+
+        z_score = stats.zscore([*prices, latest_price])[-1]
+
+        return {
+            "time_series": None,
+            f"last_{self.id}": latest_price,
             "last_z_score": z_score,
         }
