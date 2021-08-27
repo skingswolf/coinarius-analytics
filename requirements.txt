@@ -6,6 +6,9 @@ charset-normalizer==2.0.3
 click==8.0.1
 Flask==2.0.1
 Flask-SocketIO==5.1.1
+gevent==21.8.0
+gevent-websocket==0.10.1
+greenlet==1.1.1
 gunicorn==20.1.0
 h11==0.12.0
 idna==3.2
@@ -27,3 +30,5 @@ urllib3==1.26.6
 websockets==9.1
 Werkzeug==2.0.1
 wsproto==1.0.0
+zope.event==4.5.0
+zope.interface==5.4.0
