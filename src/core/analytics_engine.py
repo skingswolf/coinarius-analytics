@@ -87,14 +87,13 @@ class AnalyticsEngine:
         """
 
         if not self.__is_initialised:
-            raise Exception(
-                "Cannot start running the analytics engine because it hasn't been initialised yet."
-            )
+            self.__logger.log("Initialising engine before running the update method.")
+            self.initialise()
 
         day_in_seconds = 24 * 60 * 60
 
         self.__logger.log(
-            f"Polling LunarCrush API for the to see if there's any fresh data"
+            "Polling LunarCrush API for the to see if there's any fresh data"
         )
 
         current_time = datetime.timestamp(datetime.now())
