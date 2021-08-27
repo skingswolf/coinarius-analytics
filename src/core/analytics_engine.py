@@ -92,9 +92,7 @@ class AnalyticsEngine:
 
         day_in_seconds = 24 * 60 * 60
 
-        self.__logger.log(
-            "Polling LunarCrush API for the to see if there's any fresh data"
-        )
+        self.__logger.log("Polling LunarCrush API to see if there's any fresh data.")
 
         current_time = datetime.timestamp(datetime.now())
         is_next_day = current_time - self.__latest_time >= day_in_seconds
@@ -107,6 +105,8 @@ class AnalyticsEngine:
             else self.__generate_latest_analytics
         )
         self.__update_raw_asset_data(num_datapoints)
+
+        self.__logger.log("Generating analytics for the requested update.")
 
         analytics = generate()
         self.__last_update_time = current_time

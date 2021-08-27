@@ -54,14 +54,15 @@ def index():
         "Handling request to root URI by returning the WebSockets service HTML page."
     )
 
-    return render_template("/index.html")
+    protocol = "https" if is_production else "http"
+    return render_template("index.html", protocol=protocol)
 
 
 @app.route("/analytics")
 def analytics():
     logger.log("Handling request to root URI by returning analytics cache dictionary.")
 
-    return analytics_engine.output
+    return analytics_engine.engine_output
 
 
 @socket_io.on("my_event")
