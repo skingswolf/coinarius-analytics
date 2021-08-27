@@ -48,6 +48,14 @@ app = Flask(__name__)
 socket_io = SocketIO(app)
 
 
+@app.before_first_request
+def before_first_request():
+    logger.log(
+        "Handling first API request by initialising the analytics engine if needed."
+    )
+    analytics_engine.initialise()
+
+
 @app.route("/")
 def index():
     logger.log(
@@ -92,8 +100,5 @@ def unregister():
 
 
 if __name__ == "__main__":
-    logger.log("Starting Coinarius Analytics!")
-    analytics_engine.initialise()
-
     logger.log("Starting Flask/SocketIO server!")
     socket_io.run(app, debug=True, use_reloader=False)
