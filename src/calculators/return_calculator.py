@@ -4,7 +4,7 @@ import scipy.stats as stats
 from .analytics_calculator import AnalyticsCalculator
 
 
-class ReturnsCalculator(AnalyticsCalculator):
+class ReturnCalculator(AnalyticsCalculator):
     """
     Represents a class that calculates returns given price data.
     """
@@ -13,33 +13,33 @@ class ReturnsCalculator(AnalyticsCalculator):
         """
         Initialises a new instance of this class.
         """
-        super().__init__("return")
+        super().__init__("return", "price")
 
-    def _calculate_analytics(self, prices):
+    def _calculate_analytics(self, fundamentals):
         """
-        Calculate the analytics using the given prices.
+        Calculate the analytics using the given fundamentals.
 
         Parameters
         ----------
-        prices : double[]
-            An array of prices.
+        fundamentals : double[]
+            An array of fundamentals.
 
         Returns
         -------
             An array of the calculated analytics.
         """
-        return np.diff(np.log(list(filter(None, prices))))
+        return np.diff(np.log(list(filter(None, fundamentals))))
 
-    def _calculate_latest_analytics(self, latest_price, prices, analytics):
+    def _calculate_latest_analytics(self, latest_fundamental, fundamentals, analytics):
         """
-        Calculate the analytics using the given prices but only for the latest tick.
+        Calculate the analytics using the given fundamentals but only for the latest tick.
 
         Parameters
         ----------
-        latest_price : double
+        latest_fundamental : double
             The latest tick price.
-        prices : double[]
-            An array of prices.
+        fundamentals : double[]
+            An array of fundamentals.
         analytics : double[
             An array of analytics values.
 
@@ -48,12 +48,12 @@ class ReturnsCalculator(AnalyticsCalculator):
             An array of the calculated analytics.
         """
 
-        if len(prices) < 2:
+        if len(fundamentals) < 2:
             raise Exception(
                 "There are insufficient price data points to calculate a singular return value."
             )
 
-        in_scope_prices = [prices[-1], latest_price]
+        in_scope_prices = [fundamentals[-1], latest_fundamental]
         new_log_return = np.diff(np.log(in_scope_prices))[-1]
 
         z_score = stats.zscore([*analytics, new_log_return])[-1]

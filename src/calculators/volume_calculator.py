@@ -4,9 +4,9 @@ import scipy.stats as stats
 from .analytics_calculator import AnalyticsCalculator
 
 
-class PriceCalculator(AnalyticsCalculator):
+class VolumeCalculator(AnalyticsCalculator):
     """
-    Represents a class that parses out fundamentals from API response objects.
+    Represents a class that parses out volume values from API response objects.
     """
 
     def __init__(self):
@@ -14,31 +14,31 @@ class PriceCalculator(AnalyticsCalculator):
         Initialises a new instance of this class.
         """
 
-        super().__init__("price", "price", is_fundamental=True)
+        super().__init__("volume", "volume", is_fundamental=True)
 
     def calculate(self, asset_data):
         """
-        Calculates the price data for the given API price data.
+        Calculates the volume data for the given API volume data.
 
         Parameters
         ----------
-        fundamental_data : dict
-            API price data dictionary where relevant information
+        asset_data : dict
+            API time_series data dictionary where relevant information
             is indexed by the keyword "data".
 
         Returns
         -------
             Price data dictionary indexed by symbol names.
         """
-        price_data = {
+        volume_data = {
             datum["symbol"]: self.__build_entry(datum["symbol"], datum)
             for datum in asset_data["data"]
         }
 
-        self.fundamental_data = price_data
-        self.analytics_data = price_data
+        self.analytics_data = volume_data
+        self.fundamental_data = volume_data
 
-        return price_data
+        return volume_data
 
     def __build_entry(self, symbol, entry):
         """
@@ -68,31 +68,31 @@ class PriceCalculator(AnalyticsCalculator):
         parse_time_series = lambda ts: [
             (
                 reformat_time(ts_entry["time"]),
-                ts_entry["close"],
+                ts_entry["volume"],
             )
             for ts_entry in ts
         ]
 
         parsed_time_series = parse_time_series(entry["timeSeries"])
 
-        last_price = entry["price"]
-        prices = [entry[1] for entry in parsed_time_series if entry[1] is not None]
-        z_score = stats.zscore([*prices, last_price])[-1]
+        volume_price = entry["volume"]
+        volumes = [entry[1] for entry in parsed_time_series if entry[1] is not None]
+        z_score = stats.zscore([*volumes, volume_price])[-1]
 
         return {
             "time_series": parsed_time_series,
-            "last_price": last_price,
+            "last_volume": volume_price,
             "last_z_score": z_score,
         }
 
-    def _calculate_latest_analytics(self, latest_fundamental, fundamentals, analytics):
+    def _calculate_latest_analytics(self, latest_volume, volumes, analytics):
         """
         Calculate the analytics using the given fundamentals but only for the latest tick.
 
         Parameters
         ----------
-        latest_fundamental : double
-            The latest tick fundamentals.
+        latest_volume : double
+            The latest tick volume.
         fundamentals : double[]
             An array of fundamentals.
         analytics : double[]
@@ -103,10 +103,10 @@ class PriceCalculator(AnalyticsCalculator):
             An array of the calculated analytics.
         """
 
-        z_score = stats.zscore([*fundamentals, latest_fundamental])[-1]
+        z_score = stats.zscore([*volumes, latest_volume])[-1]
 
         return {
             "time_series": None,
-            f"last_{self.id}": latest_fundamental,
+            f"last_{self.id}": latest_volume,
             "last_z_score": z_score,
         }

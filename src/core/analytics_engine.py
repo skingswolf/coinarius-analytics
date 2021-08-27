@@ -44,9 +44,9 @@ class AnalyticsEngine:
         self.__logger = Logger.get_instance()
         self.__lunar_crush_client = lunar_crush_client
         self.__calculator_ids = [calculator.id for calculator in calculators]
-        self.__price_calculator = [
-            calculator for calculator in calculators if calculator.id == "price"
-        ][0]
+        self.__fundamantals_calculators = [
+            calculator for calculator in calculators if calculator.is_fundamental
+        ]
         self.__calculators = {calculator.id: calculator for calculator in calculators}
 
         self.__symbol_store = symbol_store
@@ -123,14 +123,17 @@ class AnalyticsEngine:
             A dictionary keyed by symbol containing all the generated anlaytics.
         """
 
-        price_data = self.__price_calculator.calculate(self.__raw_asset_data)
+        fundamentals_data = {
+            calculator.id: calculator.calculate(self.__raw_asset_data)
+            for calculator in self.__fundamantals_calculators
+        }
 
         self.analytics_data = {
-            calculator.id: calculator.calculate(price_data)
+            calculator.id: fundamentals_data[calculator.id]
+            if calculator.is_fundamental
+            else calculator.calculate(fundamentals_data[f"{calculator.fundamental_id}"])
             for calculator in self.__calculators.values()
-            if calculator.id != "price"
         }
-        self.analytics_data["price"] = price_data
 
         self.engine_output = {
             symbol: {
@@ -149,17 +152,24 @@ class AnalyticsEngine:
 
         Returns
         -------
-            A dictionary keyed by symbol containing all the generated anlaytics for the latest tick prices.
+            A dictionary keyed by symbol containing all the generated anlaytics for the latest tick fundamentals.
         """
 
-        latest_prices = {
-            datum["symbol"]: datum["price"] for datum in self.__raw_asset_data["data"]
+        fundamentals = [
+            calculator.fundamental_id for calculator in self.__fundamantals_calculators
+        ]
+
+        latest_fundamentals = {
+            datum["symbol"]: {
+                fundamental: datum[fundamental] for fundamental in fundamentals
+            }
+            for datum in self.__raw_asset_data["data"]
         }
 
         # Get all the latest analytics, including
         # those from the price calculator
         latest_analytics = {
-            calculator.id: calculator.calculate_latest(latest_prices)
+            calculator.id: calculator.calculate_latest(latest_fundamentals)
             for calculator in self.__calculators.values()
         }
 
