@@ -1,5 +1,4 @@
 from datetime import datetime
-import json
 import time
 
 from utils.logger import Logger
@@ -12,6 +11,12 @@ class AnalyticsEngine:
 
     ...
 
+    Class Attributes
+    ----------------
+    update_lag : int
+        The number of seconds between when the `update`
+        method is called.
+
     Instance Attributes
     ----------
     _logger : Logger
@@ -23,6 +28,8 @@ class AnalyticsEngine:
     calculators: AnalyticsCalculators[]
         The list of analytics calculators.
     """
+
+    update_lag = 60  # lag in seconds
 
     def __init__(self, lunar_crush_client, symbol_store, calculators):
         """
@@ -50,16 +57,13 @@ class AnalyticsEngine:
         self.__raw_asset_data = None
         self.analytics_data = None
         self.engine_output = None
+        self.__last_update_time = None
 
-    def initialise(self, shared_state):
+    def initialise(self):
         """
         Initialises the analytics engine, fetching relevant data from the
         LunarCrush API required for starting the engine later
 
-        Parameters
-        ----------
-        shared_state : dict
-            Shared state inter-process cache for the new analytics.
         """
 
         if self.__is_initialised:
@@ -72,14 +76,13 @@ class AnalyticsEngine:
 
         self.__update_raw_asset_data()
 
-        engine_output = self.__generate_analytics()
-        self.__update_analytics_shared_state(shared_state)
+        self.__generate_analytics()
 
         self.__is_initialised = True
 
-    def run(self, shared_state):
+    def update(self):
         """
-        Starts running the analytics engine, which runs a infinite loop that
+        Update increment in the analytics engine lifecycle, which is supposed to be run in a infinite loop that
         periodically polls the LunarCrushAPI for new data.
         """
 
@@ -88,52 +91,28 @@ class AnalyticsEngine:
                 "Cannot start running the analytics engine because it hasn't been initialised yet."
             )
 
-        i = 0
-        # update_lag = 60 * 5  # lag in seconds
-        update_lag = 20  # lag in seconds
         day_in_seconds = 24 * 60 * 60
 
-        while True:
-            i += 1
-            time.sleep(update_lag)
-            self.__logger.log(
-                f"Polling LunarCrush API for the {i}th time to see if there's any fresh data"
-            )
+        self.__logger.log(
+            f"Polling LunarCrush API for the to see if there's any fresh data"
+        )
 
-            current_time = datetime.timestamp(datetime.now())
-            is_next_day = current_time - self.__latest_time >= day_in_seconds
+        current_time = datetime.timestamp(datetime.now())
+        is_next_day = current_time - self.__latest_time >= day_in_seconds
 
-            num_datapoints = 5 if is_next_day else 100
+        num_datapoints = 5 if is_next_day else 100
 
-            generate = (
-                self.__generate_analytics
-                if is_next_day
-                else self.__generate_latest_analytics
-            )
-            self.__update_raw_asset_data(num_datapoints)
+        generate = (
+            self.__generate_analytics
+            if is_next_day
+            else self.__generate_latest_analytics
+        )
+        self.__update_raw_asset_data(num_datapoints)
 
-            # TODO push lastest tick or full historical changes to websocket connection.
-            analytics = generate()
+        analytics = generate()
+        self.__last_update_time = current_time
 
-            self.__update_analytics_shared_state(shared_state)
-            print("foo")
-
-    def __update_analytics_shared_state(self, shared_state):
-        """
-        Updates the shared state inter-process  cache for the new analytics.
-
-        Parameters
-        ----------
-        shared_state : dict
-            Shared state inter-process cache for the new analytics.
-        """
-
-        # Update the interprocess cache for the calculated analytics.
-        shared_state["update"] += 1
-
-        # shared_state["analytics"] = json.dumps(self.engine_output)
-        shared_state["analytics"] = self.engine_output
-        return
+        return analytics
 
     def __generate_analytics(self):
         """
