@@ -11,6 +11,8 @@ from core.symbol_store import SymbolStore
 from utils.logger import Logger
 from network.lunar_crush_client import LunarCrushClient
 
+logger = Logger.get_instance()
+
 engine_thread = Thread()
 engine_thread_stop_event = Event()
 
@@ -27,7 +29,14 @@ signal.signal(signal.SIGINT, sigint_handler)
 # In Heroku deployment environment, `__name__` will be set to `main`.
 is_production = __name__ == "main"
 
-logger = Logger.get_instance()
+if not is_production:
+    from gevent import config
+
+    logger.log(
+        "Setting resolver gevent property to 'block' to enable debugging in local development"
+    )
+    config.set("resolver", "block")
+
 
 symbol_store = SymbolStore.get_instance()
 lunar_crush_client = LunarCrushClient(symbol_store)
