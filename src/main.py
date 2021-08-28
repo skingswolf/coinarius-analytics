@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import signal
 from threading import Thread, Event
@@ -46,7 +47,8 @@ analytics_engine = AnalyticsEngine(lunar_crush_client, symbol_store, calculators
 
 
 app = Flask(__name__)
-socket_io = SocketIO(app)
+CORS(app)
+socket_io = SocketIO(app, cors_allowed_origins="*")
 
 
 @app.before_first_request
