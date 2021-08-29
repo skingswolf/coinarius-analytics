@@ -77,7 +77,8 @@ class PriceCalculator(AnalyticsCalculator):
 
         last_price = entry["price"]
         prices = [entry[1] for entry in parsed_time_series if entry[1] is not None]
-        z_score = stats.zscore([*prices, last_price])[-1]
+        prices[-1] = last_price
+        z_score = stats.zscore(prices)[-1]
 
         return {
             "time_series": parsed_time_series,

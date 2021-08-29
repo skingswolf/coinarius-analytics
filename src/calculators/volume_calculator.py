@@ -75,13 +75,14 @@ class VolumeCalculator(AnalyticsCalculator):
 
         parsed_time_series = parse_time_series(entry["timeSeries"])
 
-        volume_price = entry["volume"]
+        last_volume = entry["volume"]
         volumes = [entry[1] for entry in parsed_time_series if entry[1] is not None]
-        z_score = stats.zscore([*volumes, volume_price])[-1]
+        volumes[-1] = last_volume
+        z_score = stats.zscore(volumes)[-1]
 
         return {
             "time_series": parsed_time_series,
-            "last_volume": volume_price,
+            "last_volume": last_volume,
             "last_z_score": z_score,
         }
 
