@@ -103,7 +103,13 @@ class PriceCalculator(AnalyticsCalculator):
             An array of the calculated analytics.
         """
 
-        z_score = stats.zscore([*fundamentals, latest_fundamental])[-1]
+        fundamentals_in_scope = (
+            fundamentals
+            if latest_fundamental is None
+            else [*fundamentals, latest_fundamental]
+        )
+
+        z_score = stats.zscore(fundamentals_in_scope)[-1]
 
         return {
             "time_series": None,

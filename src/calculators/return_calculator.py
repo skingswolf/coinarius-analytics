@@ -53,7 +53,12 @@ class ReturnCalculator(AnalyticsCalculator):
                 "There are insufficient price data points to calculate a singular return value."
             )
 
-        in_scope_prices = [fundamentals[-1], latest_fundamental]
+        in_scope_prices = (
+            fundamentals[-2:]
+            if latest_fundamental is None
+            else [fundamentals[-1], latest_fundamental]
+        )
+
         new_log_return = np.diff(np.log(in_scope_prices))[-1]
 
         z_score = stats.zscore([*analytics, new_log_return])[-1]

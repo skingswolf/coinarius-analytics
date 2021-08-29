@@ -103,7 +103,11 @@ class VolumeCalculator(AnalyticsCalculator):
             An array of the calculated analytics.
         """
 
-        z_score = stats.zscore([*volumes, latest_volume])[-1]
+        volumes_in_scope = (
+            volumes if latest_volume is None else [*volumes, latest_volume]
+        )
+
+        z_score = stats.zscore(volumes_in_scope)[-1]
 
         return {
             "time_series": None,
