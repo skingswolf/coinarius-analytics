@@ -106,7 +106,7 @@ class PriceCalculator(AnalyticsCalculator):
         fundamentals_in_scope = (
             fundamentals
             if latest_fundamental is None
-            else [*fundamentals, latest_fundamental]
+            else [*fundamentals[:-1], latest_fundamental]
         )
 
         z_score = stats.zscore(fundamentals_in_scope)[-1]

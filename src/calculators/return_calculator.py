@@ -62,7 +62,7 @@ class ReturnCalculator(AnalyticsCalculator):
         in_scope_prices = (
             fundamentals[-2:]
             if latest_fundamental is None
-            else [fundamentals[-1], latest_fundamental]
+            else [fundamentals[-2], latest_fundamental]
         )
 
         new_return = (np.diff(in_scope_prices) / in_scope_prices[:-1] * 100)[-1]
