@@ -28,7 +28,9 @@ class ReturnCalculator(AnalyticsCalculator):
         -------
             An array of the calculated analytics.
         """
-        return np.diff(np.log(list(filter(None, fundamentals))))
+        prices = list(filter(None, fundamentals))
+
+        return np.diff(prices) / prices[:-1] * 100
 
     def _calculate_latest_analytics(self, latest_fundamental, fundamentals, analytics):
         """
@@ -59,12 +61,11 @@ class ReturnCalculator(AnalyticsCalculator):
             else [fundamentals[-1], latest_fundamental]
         )
 
-        new_log_return = np.diff(np.log(in_scope_prices))[-1]
-
-        z_score = stats.zscore([*analytics, new_log_return])[-1]
+        new_return = (np.diff(in_scope_prices) / in_scope_prices[:-1] * 100)[-1]
+        z_score = stats.zscore([*analytics, new_return])[-1]
 
         return {
             "time_series": None,
-            f"last_{self.id}": new_log_return,
+            f"last_{self.id}": new_return,
             "last_z_score": z_score,
         }
