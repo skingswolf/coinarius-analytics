@@ -30,7 +30,11 @@ class ReturnCalculator(AnalyticsCalculator):
         """
         prices = list(filter(None, fundamentals))
 
-        return np.diff(prices) / prices[:-1] * 100
+        returns = np.diff(prices) / prices[:-1] * 100
+
+        # Don't need to worry about "returns[0]" value here - it's accounted for later.
+        # Added here to make sure that return values are zipped together with the correct timestamps.
+        return [returns[0], *returns]
 
     def _calculate_latest_analytics(self, latest_fundamental, fundamentals, analytics):
         """
