@@ -4,6 +4,7 @@ from flask_socketio import SocketIO, emit
 import signal
 from threading import Thread, Event
 
+from calculators.rsi_calculator import RsiCalculator
 from core.analytics_engine_thread import AnalyticsEngineThread
 from calculators.market_cap_calculator import MarketCapCalculator
 from calculators.moving_average_30d_calculator import MovingAverage30dCalculator
@@ -54,6 +55,7 @@ calculators = [
     Return30dCalculator(),
     PriceDiffCalculator(),
     MovingAverage30dCalculator(),
+    RsiCalculator(),
 ]
 analytics_engine = AnalyticsEngine(lunar_crush_client, symbol_store, calculators)
 
