@@ -64,7 +64,7 @@ class PriceDiffCalculator(AnalyticsCalculator):
         )
 
         new_price_diff = np.diff(in_scope_prices)[-1]
-        z_score = stats.zscore([*analytics, new_price_diff])[-1]
+        z_score = stats.zscore([*analytics[:-1], new_price_diff])[-1]
 
         return {
             "time_series": None,

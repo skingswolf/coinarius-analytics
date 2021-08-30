@@ -59,7 +59,7 @@ class Return30dCalculator(AnalyticsCalculator):
             An array of the calculated analytics.
         """
 
-        if len(fundamentals) < 30:
+        if len(fundamentals) < self.__lag:
             raise Exception(
                 "There are insufficient price data points to calculate a singular return value."
             )
@@ -71,7 +71,7 @@ class Return30dCalculator(AnalyticsCalculator):
         )
 
         new_return_30 = (np.diff(in_scope_prices) / in_scope_prices[:-1] * 100)[-1]
-        z_score = stats.zscore([*analytics, new_return_30])[-1]
+        z_score = stats.zscore([*analytics[:-1], new_return_30])[-1]
 
         return {
             "time_series": None,

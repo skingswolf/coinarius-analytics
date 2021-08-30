@@ -64,7 +64,7 @@ class ReturnCalculator(AnalyticsCalculator):
         )
 
         new_return = (np.diff(in_scope_prices) / in_scope_prices[:-1] * 100)[-1]
-        z_score = stats.zscore([*analytics, new_return])[-1]
+        z_score = stats.zscore([*analytics[:-1], new_return])[-1]
 
         return {
             "time_series": None,
