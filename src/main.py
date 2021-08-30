@@ -4,6 +4,7 @@ from flask_socketio import SocketIO, emit
 import signal
 from threading import Thread, Event
 
+from calculators.autocorrelation_calculator import AutocorrelationCalculator
 from calculators.btc_correlation_calculator import BtcCorrelationCalculator
 from calculators.eth_correlation_calculator import EthCorrelationCalculator
 from core.analytics_engine_thread import AnalyticsEngineThread
@@ -60,8 +61,9 @@ calculators = [
     # PriceDiffCalculator(),
     # MovingAverage30dCalculator(),
     # RsiCalculator(),
-    BtcCorrelationCalculator(return_calculator),
-    EthCorrelationCalculator(return_calculator),
+    AutocorrelationCalculator(return_calculator),
+    # BtcCorrelationCalculator(return_calculator),
+    # EthCorrelationCalculator(return_calculator),
 ]
 analytics_engine = AnalyticsEngine(lunar_crush_client, symbol_store, calculators)
 

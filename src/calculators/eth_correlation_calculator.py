@@ -13,12 +13,7 @@ class EthCorrelationCalculator(CorrelationCalculator):
 
         Parameters
         ----------
-        id : str
-            The ID of this correlation calculator.
         return_calculator : ReturnCalculator
-            Returns calculator.
-        other_symbol : str
-            The other crypto symbol whose returns should be used
-            in the correlation calculations.
+            The return calculator.
         """
-        super().__init__("eth_correlation", "ETH", return_calculator)
+        super().__init__("eth_correlation", lambda symbol: "ETH", return_calculator)

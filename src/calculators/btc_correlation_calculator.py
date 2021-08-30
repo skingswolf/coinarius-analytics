@@ -13,12 +13,7 @@ class BtcCorrelationCalculator(CorrelationCalculator):
 
         Parameters
         ----------
-        id : str
-            The ID of this correlation calculator.
         return_calculator : ReturnCalculator
-            Returns calculator.
-        other_symbol : str
-            The other crypto symbol whose returns should be used
-            in the correlation calculations.
+            The returns calculator.
         """
-        super().__init__("btc_correlation", "BTC", return_calculator)
+        super().__init__("btc_correlation", lambda symbol: "BTC", return_calculator)

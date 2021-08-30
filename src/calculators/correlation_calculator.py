@@ -1,6 +1,4 @@
-import numpy as np
 import pandas as pd
-import scipy.stats as stats
 
 from .analytics_calculator import AnalyticsCalculator
 
@@ -10,7 +8,7 @@ class CorrelationCalculator(AnalyticsCalculator):
     Represents an abstract class that calculates returns looking back at 30 days worth of prices.
     """
 
-    def __init__(self, id, other_symbol, return_calculator):
+    def __init__(self, id, get_other_symbol, return_calculator):
         """
         Initialises a new instance of this class.
 
@@ -20,12 +18,12 @@ class CorrelationCalculator(AnalyticsCalculator):
             The ID of this correlation calculator.
         return_calculator : ReturnCalculator
             Returns calculator.
-        other_symbol : str
-            The other crypto symbol whose returns should be used
-            in the correlation calculations.
+        get_other_symbol : func
+            Function that returns the other crypto symbol whose returns
+            should be used in the correlation calculations.
         """
         super().__init__(id, "price")
-        self.__other_symbol = other_symbol
+        self.__get_other_symbol = get_other_symbol
         self.__return_calculator = return_calculator
 
     def calculate(self, fundamental_data):
@@ -54,7 +52,9 @@ class CorrelationCalculator(AnalyticsCalculator):
         self.fundamental_data = fundamental_data
         self.analytics_data = {
             symbol: self.__build_correlation_entry(
-                symbol, return_data[symbol], return_data[self.__other_symbol]
+                symbol,
+                return_data[symbol],
+                return_data[self.__get_other_symbol(symbol)],
             )
             for symbol in fundamental_data
         }
@@ -86,9 +86,14 @@ class CorrelationCalculator(AnalyticsCalculator):
         self.latest_analytics_data = {
             symbol: self._calculate_latest_correlation_analytics(
                 latest_return_data[symbol]["last_return"],
-                latest_return_data[self.__other_symbol]["last_return"],
+                latest_return_data[self.__get_other_symbol(symbol)]["last_return"],
                 [entry[1] for entry in return_data[symbol]["time_series"]],
-                [entry[1] for entry in return_data[self.__other_symbol]["time_series"]],
+                [
+                    entry[1]
+                    for entry in return_data[self.__get_other_symbol(symbol)][
+                        "time_series"
+                    ]
+                ],
             )
             for symbol in self.analytics_data.keys()
         }
@@ -140,7 +145,7 @@ class CorrelationCalculator(AnalyticsCalculator):
         returns : double[]
             An array of returns corresponding the asset `symbol`.
         other_returns : double[]
-            An array of returns corresponding the asset `other_symbol`.
+            An array of returns corresponding the asset `get_other_symbol`.
         Returns
         -------
             The calculated correlation.
@@ -149,7 +154,7 @@ class CorrelationCalculator(AnalyticsCalculator):
         returns = list(filter(None, returns))
         other_returns = list(filter(None, other_returns))
 
-        return self.__calculate_correlation(returns, other_returns)
+        return self._calculate_correlation(returns, other_returns)
 
     def _calculate_latest_correlation_analytics(
         self, latest_return, latest_other_return, returns, other_returns
@@ -179,7 +184,7 @@ class CorrelationCalculator(AnalyticsCalculator):
         returns = list(filter(None, returns))
         other_returns = list(filter(None, other_returns))
 
-        correlation = self.__calculate_correlation(returns, other_returns)
+        correlation = self._calculate_correlation(returns, other_returns)
 
         return {
             "time_series": None,
@@ -187,7 +192,7 @@ class CorrelationCalculator(AnalyticsCalculator):
             "last_z_score": None,
         }
 
-    def __calculate_correlation(self, returns, other_returns):
+    def _calculate_correlation(self, returns, other_returns):
         """
         Calculate the correlation between the two given return series.
 
