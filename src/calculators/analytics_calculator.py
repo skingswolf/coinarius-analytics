@@ -110,13 +110,14 @@ class AnalyticsCalculator:
         fundamentals = [entry[1] for entry in entry["time_series"]]
         time_datapoints = [entry[0] for entry in entry["time_series"]]
         analytics = self._calculate_analytics(
-            [*fundamentals, entry[f"last_{self.fundamental_id}"]]
+            [*fundamentals[:-1], entry[f"last_{self.fundamental_id}"]]
         )
 
-        last_analytics_value = analytics[-1]
-        z_score = stats.zscore(analytics)[-1]
+        filtered_analytics = list(filter(None, analytics))
+        last_analytics_value = filtered_analytics[-1]
+        z_score = stats.zscore(filtered_analytics)[-1]
 
-        analytics_time_series = list(zip(time_datapoints, analytics[:-1]))
+        analytics_time_series = list(zip(time_datapoints, filtered_analytics))
 
         return {
             "time_series": analytics_time_series,

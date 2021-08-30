@@ -7,6 +7,7 @@ from threading import Thread, Event
 from core.analytics_engine_thread import AnalyticsEngineThread
 from calculators.price_calculator import PriceCalculator
 from calculators.return_calculator import ReturnCalculator
+from calculators.return_30d_calculator import Return30dCalculator
 from calculators.volume_calculator import VolumeCalculator
 from core.analytics_engine import AnalyticsEngine
 from core.symbol_store import SymbolStore
@@ -42,7 +43,12 @@ if not is_production:
 
 symbol_store = SymbolStore.get_instance()
 lunar_crush_client = LunarCrushClient(symbol_store)
-calculators = [PriceCalculator(), VolumeCalculator(), ReturnCalculator()]
+calculators = [
+    PriceCalculator(),
+    VolumeCalculator(),
+    ReturnCalculator(),
+    Return30dCalculator(),
+]
 analytics_engine = AnalyticsEngine(lunar_crush_client, symbol_store, calculators)
 
 
