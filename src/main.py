@@ -54,16 +54,16 @@ lunar_crush_client = LunarCrushClient(symbol_store)
 return_calculator = ReturnCalculator()
 calculators = [
     PriceCalculator(),
-    # VolumeCalculator(),
-    # MarketCapCalculator(),
+    VolumeCalculator(),
+    MarketCapCalculator(),
     return_calculator,
-    # Return30dCalculator(),
-    # PriceDiffCalculator(),
-    # MovingAverage30dCalculator(),
-    # RsiCalculator(),
+    Return30dCalculator(),
+    PriceDiffCalculator(),
+    MovingAverage30dCalculator(),
+    RsiCalculator(),
     AutocorrelationCalculator(return_calculator),
-    # BtcCorrelationCalculator(return_calculator),
-    # EthCorrelationCalculator(return_calculator),
+    BtcCorrelationCalculator(return_calculator),
+    EthCorrelationCalculator(return_calculator),
 ]
 analytics_engine = AnalyticsEngine(lunar_crush_client, symbol_store, calculators)
 
