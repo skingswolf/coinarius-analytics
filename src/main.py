@@ -4,7 +4,8 @@ from flask_socketio import SocketIO, emit
 import signal
 from threading import Thread, Event
 
-from calculators.rsi_calculator import RsiCalculator
+from calculators.btc_correlation_calculator import BtcCorrelationCalculator
+from calculators.eth_correlation_calculator import EthCorrelationCalculator
 from core.analytics_engine_thread import AnalyticsEngineThread
 from calculators.market_cap_calculator import MarketCapCalculator
 from calculators.moving_average_30d_calculator import MovingAverage30dCalculator
@@ -12,6 +13,7 @@ from calculators.price_calculator import PriceCalculator
 from calculators.price_diff_calculator import PriceDiffCalculator
 from calculators.return_calculator import ReturnCalculator
 from calculators.return_30d_calculator import Return30dCalculator
+from calculators.rsi_calculator import RsiCalculator
 from calculators.volume_calculator import VolumeCalculator
 from core.analytics_engine import AnalyticsEngine
 from core.symbol_store import SymbolStore
@@ -47,15 +49,19 @@ if not is_production:
 
 symbol_store = SymbolStore.get_instance()
 lunar_crush_client = LunarCrushClient(symbol_store)
+
+return_calculator = ReturnCalculator()
 calculators = [
     PriceCalculator(),
-    VolumeCalculator(),
-    MarketCapCalculator(),
-    ReturnCalculator(),
-    Return30dCalculator(),
-    PriceDiffCalculator(),
-    MovingAverage30dCalculator(),
-    RsiCalculator(),
+    # VolumeCalculator(),
+    # MarketCapCalculator(),
+    return_calculator,
+    # Return30dCalculator(),
+    # PriceDiffCalculator(),
+    # MovingAverage30dCalculator(),
+    # RsiCalculator(),
+    BtcCorrelationCalculator(return_calculator),
+    EthCorrelationCalculator(return_calculator),
 ]
 analytics_engine = AnalyticsEngine(lunar_crush_client, symbol_store, calculators)
 
@@ -85,7 +91,9 @@ def index():
 
 @app.route("/analytics")
 def analytics():
-    logger.log("Handling request to root URI by returning analytics cache dictionary.")
+    logger.log(
+        "Handling request to /analytics URI by returning analytics cache dictionary."
+    )
 
     return analytics_engine.engine_output
 

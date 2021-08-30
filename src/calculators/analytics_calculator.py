@@ -33,6 +33,7 @@ class AnalyticsCalculator:
         self.is_fundamental = is_fundamental
         self.fundamental_data = None
         self.analytics_data = None
+        self.latest_analytics_data = None
 
     def calculate(self, fundamental_data):
         """
@@ -77,7 +78,7 @@ class AnalyticsCalculator:
                 f"Both caches for {self.fundamental_id} and analytics data are null - run `calculate` to initialise them."
             )
 
-        return {
+        self.latest_analytics_data = {
             symbol: self._calculate_latest_analytics(
                 latest_fundamentals[symbol][self.fundamental_id],
                 [entry[1] for entry in self.fundamental_data[symbol]["time_series"]],
@@ -85,6 +86,8 @@ class AnalyticsCalculator:
             )
             for symbol in self.analytics_data.keys()
         }
+
+        return self.latest_analytics_data
 
     def __build_entry(self, symbol, entry):
         """
