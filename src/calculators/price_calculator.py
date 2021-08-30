@@ -66,18 +66,17 @@ class PriceCalculator(AnalyticsCalculator):
             "%Y-%m-%d, %H:%M:%S"
         )
         parse_time_series = lambda ts: [
-            (
+            [
                 reformat_time(ts_entry["time"]),
                 ts_entry["close"],
-            )
+            ]
             for ts_entry in ts
         ]
 
-        parsed_time_series = parse_time_series(entry["timeSeries"])
-
         last_price = entry["price"]
+        parsed_time_series = parse_time_series(entry["timeSeries"])
+        parsed_time_series[-1][1] = last_price
         prices = [entry[1] for entry in parsed_time_series if entry[1] is not None]
-        prices[-1] = last_price
         z_score = stats.zscore(prices)[-1]
 
         return {

@@ -66,18 +66,17 @@ class VolumeCalculator(AnalyticsCalculator):
             "%Y-%m-%d, %H:%M:%S"
         )
         parse_time_series = lambda ts: [
-            (
+            [
                 reformat_time(ts_entry["time"]),
                 ts_entry["volume"],
-            )
+            ]
             for ts_entry in ts
         ]
 
-        parsed_time_series = parse_time_series(entry["timeSeries"])
-
         last_volume = entry["volume"]
+        parsed_time_series = parse_time_series(entry["timeSeries"])
+        parsed_time_series[-1][1] = last_volume
         volumes = [entry[1] for entry in parsed_time_series if entry[1] is not None]
-        volumes[-1] = last_volume
         z_score = stats.zscore(volumes)[-1]
 
         return {
