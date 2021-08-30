@@ -62,7 +62,7 @@ class LunarCrushClient:
             "key": self.__api_key,
             "symbol": str(self.__symbol_store),
             "interval": "day",
-            "time_series_indicators": "close,volume",
+            "time_series_indicators": "close,volume,market_cap",
             "data_points": num_of_datapoints,
         }
         response = requests.get(LunarCrushClient.lunar_crush_base_url, params=query)

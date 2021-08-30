@@ -5,6 +5,7 @@ import signal
 from threading import Thread, Event
 
 from core.analytics_engine_thread import AnalyticsEngineThread
+from calculators.market_cap_calculator import MarketCapCalculator
 from calculators.price_calculator import PriceCalculator
 from calculators.return_calculator import ReturnCalculator
 from calculators.return_30d_calculator import Return30dCalculator
@@ -46,6 +47,7 @@ lunar_crush_client = LunarCrushClient(symbol_store)
 calculators = [
     PriceCalculator(),
     VolumeCalculator(),
+    MarketCapCalculator(),
     ReturnCalculator(),
     Return30dCalculator(),
 ]
