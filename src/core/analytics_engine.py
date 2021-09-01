@@ -136,12 +136,20 @@ class AnalyticsEngine:
         }
 
         for symbol in self.__symbol_store.symbols:
-            self.engine_output[symbol] = {
-                calculator_id: self.analytics_data[calculator_id][symbol]
-                for calculator_id in self.__calculator_ids
-            }
+            total_z_score = 0
+            self.engine_output[symbol] = {}
+
+            for calculator_id in self.__calculator_ids:
+                self.engine_output[symbol][calculator_id] = self.analytics_data[
+                    calculator_id
+                ][symbol]
+
+                total_z_score += abs(
+                    self.engine_output[symbol][calculator_id]["last_z_score"]
+                )
 
             self.engine_output[symbol]["name"] = self.__symbol_store.symbol_map[symbol]
+            self.engine_output[symbol]["total_z_score"] = total_z_score
 
         return self.engine_output
 
@@ -181,15 +189,24 @@ class AnalyticsEngine:
             for symbol in self.__symbol_store.symbols
         }
 
-        # Update the local cache for the engine output
+        # Update the local cache for the engine output.
+        # Calculate total z-score values for both the
+        # engine output and latest engine output objects.
         for symbol in self.__symbol_store.symbols:
+            total_z_score = 0
+
             for calculator_id in self.__calculator_ids:
+                z_score = latest_engine_output[symbol][calculator_id][f"last_z_score"]
+
                 self.engine_output[symbol][calculator_id][
                     f"last_{calculator_id}"
                 ] = latest_engine_output[symbol][calculator_id][f"last_{calculator_id}"]
-                self.engine_output[symbol][calculator_id][
-                    f"last_z_score"
-                ] = latest_engine_output[symbol][calculator_id][f"last_z_score"]
+                self.engine_output[symbol][calculator_id]["last_z_score"] = z_score
+
+                total_z_score += abs(z_score)
+
+            self.engine_output[symbol]["total_z_score"] = total_z_score
+            latest_engine_output[symbol]["total_z_score"] = total_z_score
 
         return latest_engine_output
 
