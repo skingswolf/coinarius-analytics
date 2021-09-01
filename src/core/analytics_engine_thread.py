@@ -59,5 +59,6 @@ class AnalyticsEngineThread(Thread):
             self.__logger.log(f"Updating engine for the {i}th time.")
             analytics = self.__analytics_engine.update()
 
+            self.__logger.log(f"Sending latest engine output to clients.")
             self.__socket_io.emit("fresh_analytics", {"analytics": analytics})
             i += 1

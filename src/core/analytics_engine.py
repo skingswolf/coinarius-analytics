@@ -55,8 +55,8 @@ class AnalyticsEngine:
         self.__earliest_time = None
         self.__latest_time = None
         self.__raw_asset_data = None
-        self.analytics_data = None
-        self.engine_output = None
+        self.analytics_data = {}
+        self.engine_output = {}
         self.__last_update_time = None
 
     def initialise(self):
@@ -135,13 +135,13 @@ class AnalyticsEngine:
             for calculator in self.__calculators.values()
         }
 
-        self.engine_output = {
-            symbol: {
+        for symbol in self.__symbol_store.symbols:
+            self.engine_output[symbol] = {
                 calculator_id: self.analytics_data[calculator_id][symbol]
                 for calculator_id in self.__calculator_ids
             }
-            for symbol in self.__symbol_store.symbols
-        }
+
+            self.engine_output[symbol]["name"] = self.__symbol_store.symbol_map[symbol]
 
         return self.engine_output
 

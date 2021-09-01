@@ -170,7 +170,7 @@ class CorrelationCalculator(AnalyticsCalculator):
             The latest return for the other symbol.
         returns : double[]
             An array of fundamentals.
-        other_returns : double[
+        other_returns : double[]
             An array of analytics values.
 
         Returns

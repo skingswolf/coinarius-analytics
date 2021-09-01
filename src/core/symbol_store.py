@@ -9,7 +9,14 @@ class SymbolStore:
         """
         Initialises a new instance of this class.
         """
-        self.symbols = ["BTC", "ETH", "LTC", "BCH", "DOGE"]
+        self.symbol_map = {
+            "BTC": "Bitcoin",
+            "ETH": "Ethereum",
+            "LTC": "Litecoin",
+            "BCH": "Bitcoin Cash",
+            "DOGE": "Dogecoin",
+        }
+        self.symbols = self.symbol_map.keys()
 
         if SymbolStore.__instance is not None:
             raise Exception("SymbolStore class is a Singleton!")
