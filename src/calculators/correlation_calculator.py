@@ -187,7 +187,7 @@ class CorrelationCalculator(AnalyticsCalculator):
         correlation = self._calculate_correlation(returns, other_returns)
 
         return {
-            "time_series": [correlation],
+            "time_series": None,
             f"last_{self.id}": correlation,
             "last_z_score": 0,
         }
