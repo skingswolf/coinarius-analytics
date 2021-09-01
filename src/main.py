@@ -16,6 +16,7 @@ from calculators.return_calculator import ReturnCalculator
 from calculators.return_30d_calculator import Return30dCalculator
 from calculators.rsi_calculator import RsiCalculator
 from calculators.volume_calculator import VolumeCalculator
+from calculators.volume_diff_calculator import VolumeDiffCalculator
 from core.analytics_engine import AnalyticsEngine
 from core.symbol_store import SymbolStore
 from utils.logger import Logger
@@ -59,6 +60,7 @@ calculators = [
     return_calculator,
     Return30dCalculator(),
     PriceDiffCalculator(),
+    VolumeDiffCalculator(),
     MovingAverage30dCalculator(),
     RsiCalculator(),
     AutocorrelationCalculator(return_calculator),
