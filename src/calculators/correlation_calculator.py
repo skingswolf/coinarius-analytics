@@ -138,7 +138,7 @@ class CorrelationCalculator(AnalyticsCalculator):
 
     def _calculate_correlation_analytics(self, returns, other_returns):
         """
-        Calculates the crypto returns correlation (singular) using the given returnss.
+        Calculates the crypto returns correlation (singular) using the given returns.
 
         Parameters
         ----------

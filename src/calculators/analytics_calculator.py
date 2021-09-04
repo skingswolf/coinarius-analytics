@@ -120,7 +120,9 @@ class AnalyticsCalculator:
         last_analytics_value = filtered_analytics[-1]
         z_score = stats.zscore(filtered_analytics)[-1]
 
-        analytics_time_series = list(zip(time_datapoints, filtered_analytics))
+        analytics_time_series = list(
+            zip(time_datapoints[-len(filtered_analytics) :], filtered_analytics)
+        )
 
         return {
             "time_series": analytics_time_series,
