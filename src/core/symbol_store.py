@@ -6,16 +6,26 @@ class SymbolStore:
     __instance = None
 
     def __init__(self):
-        """
-        Initialises a new instance of this class.
-        """
         self.symbol_map = {
             "BTC": "Bitcoin",
             "ETH": "Ethereum",
+            "HEX": "HEX",
+            "ADA": "Cardano",
+            "BNB": "Binance Coin",
+            "USDT": "Tether",
+            "XRP": "XRP",
+            "SOL": "Solana",
+            "DOGE": "Dogecoin",
+            "DOT": "Polkadot",
+            "USDC": "USD Coin",
+            "UNI": "Uniswap",
+            "LINK": "Chainlink",
             "LTC": "Litecoin",
             "BCH": "Bitcoin Cash",
-            "DOGE": "Dogecoin",
         }
+        """
+        Initialises a new instance of this class.
+        """
         self.symbols = self.symbol_map.keys()
 
         if SymbolStore.__instance is not None:
